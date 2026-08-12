@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 /// "오늘의 할일" 화면 — 미완료·완료 항목을 구분 없이 하나의 목록으로 표시 (완료 항목은 정렬상 하단에 위치).
 public struct TodayListView: View {
@@ -13,6 +14,8 @@ public struct TodayListView: View {
     @State private var showingHabitEditor = false
     @State private var habitPendingDelete: TodoItem?
     @State private var memoTarget: TodoItem?
+    @State private var isImporting = false
+    @State private var importError: String?
 
     private var todayWeekday: Int { TodayFilter.todayWeekday() }
 
@@ -69,6 +72,30 @@ public struct TodayListView: View {
                     }
                     .tint(Color.appAccentText)
                 }
+                ToolbarItem(placement: .secondaryAction) {
+                    Button {
+                        isImporting = true
+                    } label: {
+                        Label("DoNow에서 가져오기", systemImage: "square.and.arrow.down")
+                    }
+                }
+            }
+            .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
+                switch result {
+                case .success(let url):
+                    do {
+                        try TodoDataImport.importFile(at: url, into: modelContext)
+                    } catch {
+                        importError = error.localizedDescription
+                    }
+                case .failure(let error):
+                    importError = error.localizedDescription
+                }
+            }
+            .alert("가져오기 실패", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
+                Button("확인", role: .cancel) {}
+            } message: {
+                Text(importError ?? "")
             }
             .sheet(isPresented: $showingHabitEditor) {
                 HabitEditorView()
