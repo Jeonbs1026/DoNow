@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 private enum RepeatMode: String, CaseIterable, Identifiable {
     case daily = "매일"
@@ -87,8 +88,16 @@ struct HabitEditorView: View {
                                 || (repeatMode == .customDays && selectedDays.isEmpty)
                         )
                 }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("완료") { hideKeyboard() }
+                }
             }
         }
+    }
+
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
     private var weekdayChipRow: some View {

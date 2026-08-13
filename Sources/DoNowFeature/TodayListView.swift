@@ -51,6 +51,7 @@ public struct TodayListView: View {
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
                     .environment(\.defaultMinListRowHeight, 0)
+                    .scrollDismissesKeyboard(.interactively)
                 }
             }
             .padding(.horizontal, 26)
