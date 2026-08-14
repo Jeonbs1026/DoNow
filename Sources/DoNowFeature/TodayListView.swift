@@ -234,8 +234,8 @@ private struct TodoRow: View {
     private var habitFrequencyLabel: String {
         switch item.effectiveFrequency {
         case .daily: return "매일"
-        case .weekly: return "주 1회"
-        case .monthly: return "월 1회"
+        case .weekly: return "주"
+        case .monthly: return "월"
         }
     }
 
