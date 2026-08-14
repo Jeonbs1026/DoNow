@@ -40,7 +40,9 @@ struct QuickAddBar: View {
     private func addTask() {
         let trimmed = title.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
-        modelContext.insert(TodoItem(title: trimmed, type: .task))
+        let newItem = TodoItem(title: trimmed, type: .task)
+        newItem.sortOrder = TodayFilter.nextSortOrder(in: modelContext)
+        modelContext.insert(newItem)
         TodayFilter.commitChange(in: modelContext)
         title = ""
     }

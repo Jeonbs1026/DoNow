@@ -182,7 +182,9 @@ struct HabitEditorView: View {
             repeatDays = nil
         }
 
-        modelContext.insert(TodoItem(title: trimmed, type: .habit, repeatDays: repeatDays, frequency: frequency))
+        let newItem = TodoItem(title: trimmed, type: .habit, repeatDays: repeatDays, frequency: frequency)
+        newItem.sortOrder = TodayFilter.nextSortOrder(in: modelContext)
+        modelContext.insert(newItem)
         TodayFilter.commitChange(in: modelContext)
         dismiss()
     }

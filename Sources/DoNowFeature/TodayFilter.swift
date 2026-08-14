@@ -120,12 +120,23 @@ public enum TodayFilter {
         }
     }
 
+    /// 새 항목을 목록 맨 뒤에 붙이기 위한 다음 순번.
+    static func nextSortOrder(in context: ModelContext) -> Int {
+        let maxOrder = (try? context.fetch(
+            FetchDescriptor<TodoItem>(sortBy: [SortDescriptor(\.sortOrder, order: .reverse)])
+        ))?.first?.sortOrder ?? -1
+        return maxOrder + 1
+    }
+
     public static func sortedTodayList(_ items: [TodoItem], completedIds: Set<UUID>) -> [TodoItem] {
         items.sorted { lhs, rhs in
             let lhsDone = completedIds.contains(lhs.id)
             let rhsDone = completedIds.contains(rhs.id)
             if lhsDone != rhsDone {
                 return !lhsDone
+            }
+            if lhs.sortOrder != rhs.sortOrder {
+                return lhs.sortOrder < rhs.sortOrder
             }
             return lhs.createdAt < rhs.createdAt
         }

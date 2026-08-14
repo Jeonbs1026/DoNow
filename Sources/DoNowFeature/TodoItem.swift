@@ -26,6 +26,8 @@ public final class TodoItem {
     var createdAt: Date
     var isArchived: Bool
     var memo: String?
+    /// 목록에서 사용자가 직접 정한 순서. 값이 같으면 생성일순으로 정렬.
+    var sortOrder: Int = 0
 
     var effectiveFrequency: RepeatFrequency { frequency ?? .daily }
 

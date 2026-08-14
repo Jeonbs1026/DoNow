@@ -47,6 +47,9 @@ public struct TodayListView: View {
                         ForEach(items) { item in
                             todoRow(item, isDone: completedIds.contains(item.id))
                         }
+                        .onMove { source, destination in
+                            moveItems(items, from: source, to: destination)
+                        }
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
@@ -165,6 +168,15 @@ public struct TodayListView: View {
         }
     }
 
+    private func moveItems(_ items: [TodoItem], from source: IndexSet, to destination: Int) {
+        var reordered = items
+        reordered.move(fromOffsets: source, toOffset: destination)
+        for (index, item) in reordered.enumerated() {
+            item.sortOrder = index
+        }
+        try? modelContext.save()
+    }
+
     private func toggle(_ item: TodoItem) {
         withAnimation(.easeInOut(duration: 0.25)) {
             TodayFilter.toggleCompletion(todoId: item.id, dateKey: TodayFilter.periodKey(for: item), in: modelContext)
@@ -197,11 +209,7 @@ private struct TodoRow: View {
                         .strikethrough(isDone)
                         .opacity(isDone ? 0.4 : 1)
                         .animation(.easeInOut(duration: 0.2), value: isDone)
-                    if item.type == .habit {
-                        Image(systemName: "repeat")
-                            .font(.system(size: 12))
-                            .foregroundStyle(Color.appText.opacity(0.45))
-                    }
+                    habitBadge
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
@@ -221,6 +229,26 @@ private struct TodoRow: View {
         }
         .padding(.vertical, 13)
         .overlay(Rectangle().fill(Color.appDivider).frame(height: 1), alignment: .bottom)
+    }
+
+    /// daily/customDays 반복은 아이콘만, 주/월 단위 반복은 눈에 띄는 캡슐 배지로 구분해서 보여준다.
+    @ViewBuilder
+    private var habitBadge: some View {
+        if item.type == .habit {
+            switch item.effectiveFrequency {
+            case .daily:
+                Image(systemName: "repeat")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.appText.opacity(0.45))
+            case .weekly, .monthly:
+                Text(item.effectiveFrequency == .weekly ? "주 1회" : "월 1회")
+                    .font(.system(size: 10, weight: .medium, design: .serif))
+                    .foregroundStyle(Color.appAccentText)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .overlay(Capsule().stroke(Color.appAccent, lineWidth: 1))
+            }
+        }
     }
 
     private var checkCircle: some View {
