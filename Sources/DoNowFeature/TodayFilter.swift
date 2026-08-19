@@ -128,12 +128,30 @@ public enum TodayFilter {
         return maxOrder + 1
     }
 
+    /// 할일(일회성)이 가장 먼저, 그다음 월 1회 → 주 1회 → 매일 반복 순으로 묶어서 보여준다.
+    private static func frequencyTier(_ item: TodoItem) -> Int {
+        switch item.type {
+        case .task: return 0
+        case .habit:
+            switch item.effectiveFrequency {
+            case .monthly: return 1
+            case .weekly: return 2
+            case .daily: return 3
+            }
+        }
+    }
+
     public static func sortedTodayList(_ items: [TodoItem], completedIds: Set<UUID>) -> [TodoItem] {
         items.sorted { lhs, rhs in
             let lhsDone = completedIds.contains(lhs.id)
             let rhsDone = completedIds.contains(rhs.id)
             if lhsDone != rhsDone {
                 return !lhsDone
+            }
+            let lhsTier = frequencyTier(lhs)
+            let rhsTier = frequencyTier(rhs)
+            if lhsTier != rhsTier {
+                return lhsTier < rhsTier
             }
             if lhs.sortOrder != rhs.sortOrder {
                 return lhs.sortOrder < rhs.sortOrder
