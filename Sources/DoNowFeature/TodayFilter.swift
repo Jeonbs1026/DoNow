@@ -128,16 +128,16 @@ public enum TodayFilter {
         return maxOrder + 1
     }
 
-    /// 할일(일회성)이 가장 먼저, 그다음 월 1회 → 주 1회 → 매일 반복 순으로 묶어서 보여준다.
+    /// 월 1회 → 주 1회 → 매일 반복 순으로 먼저 묶고, 일회성 할일은 맨 아래.
     private static func frequencyTier(_ item: TodoItem) -> Int {
         switch item.type {
-        case .task: return 0
         case .habit:
             switch item.effectiveFrequency {
-            case .monthly: return 1
-            case .weekly: return 2
-            case .daily: return 3
+            case .monthly: return 0
+            case .weekly: return 1
+            case .daily: return 2
             }
+        case .task: return 3
         }
     }
 
